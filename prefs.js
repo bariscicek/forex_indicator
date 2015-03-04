@@ -17,6 +17,8 @@ const FOREX_REFRESH_INTERVAL = 'refresh-interval';
 const FOREX_PRICE_IN_PANEL = 'price-in-panel';
 
 const SYMBOLS = [
+    'USDTRY',
+    'TRYUSD',
     'EURUSD',
     'GBPUSD',
     'USDJPY',
