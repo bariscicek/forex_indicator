@@ -22,7 +22,7 @@ const FOREX_REFRESH_INTERVAL = 'refresh-interval';
 const FOREX_PRICE_IN_PANEL = 'price-in-panel';
 const FOREX_ONLINE_STATUS = 'online-status';
 
-const QUOTES_URL = 'http://quotes.instaforex.com/get_quotes.php';
+const QUOTES_URL = 'http://query.yahooapis.com/v1/public/yql';
 const UP_POINTING = String.fromCharCode(9650);
 const DOWN_POINTING = String.fromCharCode(9660);
 
@@ -100,8 +100,9 @@ const ForexIndicator = new Lang.Class({
 
     _loadData: function() {
         let params = {
-            m: 'json',
-            q: this._currentPair
+            format: 'json',
+            env: 'store://datatables.org/alltableswithkeys',
+            q: 'select * from yahoo.finance.xchange where pair in ("' + this._currentPair + '")'
         };
         _httpSession = new Soup.Session();
         let message = Soup.form_request_new_from_hash('GET', QUOTES_URL, params);
@@ -149,14 +150,16 @@ const ForexIndicator = new Lang.Class({
     },
 
     _refreshUI: function(data) {
-        for (let i in data) {
-            this.symbol.set_text(data[i].symbol);
-            this.ask.set_text(data[i].ask);
-            this.bid.set_text(data[i].bid);
-            this.change.set_text(data[i].change);
-            let date = new Date((data[i].lasttime - 7200) * 1000);
-            this.lasttime.set_text(date.toLocaleString());
-        }
+        var d = data.query.results.rate;
+        var tmp = parseFloat(this.ask.get_text());
+        var tmp1 = parseFloat(d.Ask);
+        this.symbol.set_text(d.id);
+        this.ask.set_text(d.Ask);
+        this.bid.set_text(d.Bid);
+
+        this.change.set_text(tmp > tmp1 ? "-1" : "1");
+        let date = new Date(data.query.created);
+        this.lasttime.set_text(date.toTimeString());
 
         let txt;
         if (this.change.text > 0)
